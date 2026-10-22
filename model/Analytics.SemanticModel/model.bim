@@ -1,0 +1,534 @@
+{
+  "name": "Analytics",
+  "compatibilityLevel": 1600,
+  "model": {
+    "culture": "pl-PL",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "expressions": [
+      {
+        "name": "DataRoot",
+        "kind": "m",
+        "expression": "\"C:/PowerBI/data\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]"
+      },
+      {
+        "name": "stg_orders",
+        "kind": "m",
+        "expression": "let\n    Source = Csv.Document(File.Contents(DataRoot & \"/raw/orders.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Headers, {{\"BatchID\", type text}, {\"Date\", type date}, {\"ProductID\", type text}, {\"LineID\", type text}, {\"PlannedUnits\", Int64.Type}, {\"MaterialCostPLN\", type number}}, \"en-US\")\nin\n    Typed"
+      },
+      {
+        "name": "stg_mes",
+        "kind": "m",
+        "expression": "let\n    Source = Csv.Document(File.Contents(DataRoot & \"/raw/mes.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Headers, {{\"BatchID\", type text}, {\"TotalUnits\", Int64.Type}, {\"GoodUnits\", Int64.Type}, {\"ScrapUnits\", Int64.Type}, {\"PlannedMinutes\", Int64.Type}, {\"RunMinutes\", type number}, {\"IdealMinutes\", type number}, {\"LaborHours\", type number}, {\"EnergyKWh\", type number}}, \"en-US\")\nin\n    Typed"
+      },
+      {
+        "name": "stg_rates",
+        "kind": "m",
+        "expression": "let\n    Source = Csv.Document(File.Contents(DataRoot & \"/raw/rates.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Headers, {{\"LineID\", type text}, {\"LaborRate\", Int64.Type}, {\"EnergyRate\", type number}}, \"en-US\")\nin\n    Typed"
+      }
+    ],
+    "tables": [
+      {
+        "name": "Date",
+        "columns": [
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd",
+            "isKey": true,
+            "annotations": [
+              {
+                "name": "UnderlyingDateTimeDataType",
+                "value": "Date"
+              }
+            ]
+          },
+          {
+            "name": "Year",
+            "dataType": "int64",
+            "sourceColumn": "Year",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "Month",
+            "dataType": "int64",
+            "sourceColumn": "Month",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "YearMonth",
+            "dataType": "string",
+            "sourceColumn": "YearMonth",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Quarter",
+            "dataType": "string",
+            "sourceColumn": "Quarter",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Date",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(DataRoot & \"/dimensions/Date.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"Date\", type date}, {\"Year\", Int64.Type}, {\"Month\", Int64.Type}, {\"YearMonth\", type text}, {\"Quarter\", type text}}, \"en-US\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ],
+        "dataCategory": "Time"
+      },
+      {
+        "name": "Product",
+        "columns": [
+          {
+            "name": "ProductID",
+            "dataType": "string",
+            "sourceColumn": "ProductID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Product",
+            "dataType": "string",
+            "sourceColumn": "Product",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Family",
+            "dataType": "string",
+            "sourceColumn": "Family",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "StandardUnitCost",
+            "dataType": "int64",
+            "sourceColumn": "StandardUnitCost",
+            "summarizeBy": "sum"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Product",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(DataRoot & \"/dimensions/Product.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"ProductID\", type text}, {\"Product\", type text}, {\"Family\", type text}, {\"StandardUnitCost\", Int64.Type}}, \"en-US\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Line",
+        "columns": [
+          {
+            "name": "LineID",
+            "dataType": "string",
+            "sourceColumn": "LineID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Line",
+            "dataType": "string",
+            "sourceColumn": "Line",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Technology",
+            "dataType": "string",
+            "sourceColumn": "Technology",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Line",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(DataRoot & \"/dimensions/Line.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"LineID\", type text}, {\"Line\", type text}, {\"Technology\", type text}}, \"en-US\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Production",
+        "columns": [
+          {
+            "name": "BatchID",
+            "dataType": "string",
+            "sourceColumn": "BatchID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "ProductID",
+            "dataType": "string",
+            "sourceColumn": "ProductID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "LineID",
+            "dataType": "string",
+            "sourceColumn": "LineID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "PlannedUnits",
+            "dataType": "int64",
+            "sourceColumn": "PlannedUnits",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "MaterialCostPLN",
+            "dataType": "double",
+            "sourceColumn": "MaterialCostPLN",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "TotalUnits",
+            "dataType": "int64",
+            "sourceColumn": "TotalUnits",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "GoodUnits",
+            "dataType": "int64",
+            "sourceColumn": "GoodUnits",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "ScrapUnits",
+            "dataType": "int64",
+            "sourceColumn": "ScrapUnits",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "PlannedMinutes",
+            "dataType": "int64",
+            "sourceColumn": "PlannedMinutes",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "RunMinutes",
+            "dataType": "double",
+            "sourceColumn": "RunMinutes",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "IdealMinutes",
+            "dataType": "double",
+            "sourceColumn": "IdealMinutes",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "LaborHours",
+            "dataType": "double",
+            "sourceColumn": "LaborHours",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "EnergyKWh",
+            "dataType": "double",
+            "sourceColumn": "EnergyKWh",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "LaborCostPLN",
+            "dataType": "double",
+            "sourceColumn": "LaborCostPLN",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "EnergyCostPLN",
+            "dataType": "double",
+            "sourceColumn": "EnergyCostPLN",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "ActualCostPLN",
+            "dataType": "double",
+            "sourceColumn": "ActualCostPLN",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "FlexibleBudgetPLN",
+            "dataType": "int64",
+            "sourceColumn": "FlexibleBudgetPLN",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "StaticBudgetPLN",
+            "dataType": "int64",
+            "sourceColumn": "StaticBudgetPLN",
+            "summarizeBy": "sum"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Production",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    A = Table.NestedJoin(stg_orders, {\"BatchID\"}, stg_mes, {\"BatchID\"}, \"MES\", JoinKind.LeftOuter),",
+                "    B = Table.ExpandTableColumn(A, \"MES\", {\"TotalUnits\",\"GoodUnits\",\"ScrapUnits\",\"PlannedMinutes\",\"RunMinutes\",\"IdealMinutes\",\"LaborHours\",\"EnergyKWh\"}),",
+                "    C = Table.NestedJoin(B, {\"LineID\"}, stg_rates, {\"LineID\"}, \"Rates\", JoinKind.LeftOuter),",
+                "    D = Table.ExpandTableColumn(C, \"Rates\", {\"LaborRate\",\"EnergyRate\"}),",
+                "    E = Table.NestedJoin(D, {\"ProductID\"}, Product, {\"ProductID\"}, \"Standard\", JoinKind.LeftOuter),",
+                "    F = Table.ExpandTableColumn(E, \"Standard\", {\"StandardUnitCost\"}),",
+                "    Checked = if Table.RowCount(F) <> Table.RowCount(stg_orders) or List.Contains(F[GoodUnits], null) or List.Contains(F[LaborRate], null) or List.Contains(F[StandardUnitCost], null) then error \"Missing/duplicate MES, product or rate key\" else F,",
+                "    G = Table.AddColumn(Checked, \"LaborCostPLN\", each Number.Round([LaborHours]*[LaborRate],2), type number),",
+                "    H = Table.AddColumn(G, \"EnergyCostPLN\", each Number.Round([EnergyKWh]*[EnergyRate],2), type number),",
+                "    I = Table.AddColumn(H, \"ActualCostPLN\", each Number.Round([MaterialCostPLN]+[LaborCostPLN]+[EnergyCostPLN],2), type number),",
+                "    J = Table.AddColumn(I, \"FlexibleBudgetPLN\", each [GoodUnits]*[StandardUnitCost], type number),",
+                "    K = Table.AddColumn(J, \"StaticBudgetPLN\", each [PlannedUnits]*[StandardUnitCost], type number)",
+                "in K"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Koszt produkcji",
+            "expression": "SUM(Production[ActualCostPLN])",
+            "formatString": "#,0.00",
+            "description": "Koszt produkcji",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Budżet elastyczny",
+            "expression": "SUM(Production[FlexibleBudgetPLN])",
+            "formatString": "#,0.00",
+            "description": "Budżet elastyczny",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Budżet statyczny",
+            "expression": "SUM(Production[StaticBudgetPLN])",
+            "formatString": "#,0.00",
+            "description": "Budżet statyczny",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Materiał",
+            "expression": "SUM(Production[MaterialCostPLN])",
+            "formatString": "#,0.00",
+            "description": "Materiał",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Praca",
+            "expression": "SUM(Production[LaborCostPLN])",
+            "formatString": "#,0.00",
+            "description": "Praca",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Energia",
+            "expression": "SUM(Production[EnergyCostPLN])",
+            "formatString": "#,0.00",
+            "description": "Energia",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Dobre sztuki",
+            "expression": "SUM(Production[GoodUnits])",
+            "formatString": "#,0.00",
+            "description": "Dobre sztuki",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Braki",
+            "expression": "SUM(Production[ScrapUnits])",
+            "formatString": "#,0.00",
+            "description": "Braki",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Produkcja ogółem",
+            "expression": "SUM(Production[TotalUnits])",
+            "formatString": "#,0.00",
+            "description": "Produkcja ogółem",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Koszt jednostkowy",
+            "expression": "DIVIDE([Koszt produkcji],[Dobre sztuki])",
+            "formatString": "#,0.00",
+            "description": "Koszt jednostkowy",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Odchylenie efektywności",
+            "expression": "[Koszt produkcji]-[Budżet elastyczny]",
+            "formatString": "#,0.00",
+            "description": "Odchylenie efektywności",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Efekt wolumenu",
+            "expression": "[Budżet elastyczny]-[Budżet statyczny]",
+            "formatString": "#,0.00",
+            "description": "Efekt wolumenu",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Odchylenie całkowite",
+            "expression": "[Koszt produkcji]-[Budżet statyczny]",
+            "formatString": "#,0.00",
+            "description": "Odchylenie całkowite",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Braki %",
+            "expression": "DIVIDE([Braki],[Produkcja ogółem])",
+            "formatString": "0.0%",
+            "description": "Braki %",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Dostępność",
+            "expression": "DIVIDE(SUM(Production[RunMinutes]),SUM(Production[PlannedMinutes]))",
+            "formatString": "0.0%",
+            "description": "Dostępność",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wydajność",
+            "expression": "DIVIDE(SUM(Production[IdealMinutes]),SUM(Production[RunMinutes]))",
+            "formatString": "0.0%",
+            "description": "Wydajność",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Jakość",
+            "expression": "DIVIDE([Dobre sztuki],[Produkcja ogółem])",
+            "formatString": "0.0%",
+            "description": "Jakość",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "OEE",
+            "expression": "[Dostępność]*[Wydajność]*[Jakość]",
+            "formatString": "0.0%",
+            "description": "OEE zagregowane z ważonych komponentów; nie średnia procentów partii.",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wartość poprzedni miesiąc",
+            "expression": "CALCULATE([Koszt produkcji], DATEADD('Date'[Date],-1,MONTH))",
+            "formatString": "#,0.00",
+            "description": "Wartość poprzedni miesiąc",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Zmiana m/m %",
+            "expression": "DIVIDE([Koszt produkcji]-[Wartość poprzedni miesiąc],[Wartość poprzedni miesiąc])",
+            "formatString": "0.0%",
+            "description": "Porównanie bieżącego zbioru dat z przesuniętym o miesiąc; na karcie wybierz jeden miesiąc.",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wartość poprzedni rok",
+            "expression": "CALCULATE([Koszt produkcji], SAMEPERIODLASTYEAR('Date'[Date]))",
+            "formatString": "#,0.00",
+            "description": "Wartość poprzedni rok",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Zmiana r/r %",
+            "expression": "DIVIDE([Koszt produkcji]-[Wartość poprzedni rok],[Wartość poprzedni rok])",
+            "formatString": "0.0%",
+            "description": "Zmiana r/r %",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wartość YTD",
+            "expression": "TOTALYTD([Koszt produkcji],'Date'[Date])",
+            "formatString": "#,0.00",
+            "description": "Wartość YTD",
+            "displayFolder": "KPI"
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "rel_Date",
+        "fromTable": "Production",
+        "fromColumn": "Date",
+        "toTable": "Date",
+        "toColumn": "Date",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "isActive": true
+      },
+      {
+        "name": "rel_Product",
+        "fromTable": "Production",
+        "fromColumn": "ProductID",
+        "toTable": "Product",
+        "toColumn": "ProductID",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "isActive": true
+      },
+      {
+        "name": "rel_Line",
+        "fromTable": "Production",
+        "fromColumn": "LineID",
+        "toTable": "Line",
+        "toColumn": "LineID",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "isActive": true
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBI_ProTooling",
+        "value": "[\"DevMode\"]"
+      }
+    ]
+  }
+}

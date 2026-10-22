@@ -1,0 +1,15 @@
+{
+  "slug": "PowerBI-Production-Controlling",
+  "title": "Production Controlling",
+  "pl": "Koszt jednostkowy, odchylenia i efektywność",
+  "accent": "#F0AE49",
+  "tag": "MANUFACTURING INTELLIGENCE",
+  "fact": "Production",
+  "grain": "Jedna partia produkcyjna (BatchID), jeden produkt i jedna linia.",
+  "question": "Czy wzrost kosztu wynika z wolumenu, zużycia materiału czy sprawności produkcji?",
+  "pages": [
+    "01 | Wynik produkcji",
+    "02 | Odchylenia kosztów",
+    "03 | Jakość i efektywność"
+  ]
+}

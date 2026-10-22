@@ -1,0 +1,91 @@
+// Koszt produkcji
+Koszt produkcji =
+    SUM(Production[ActualCostPLN])
+
+// Budżet elastyczny
+Budżet elastyczny =
+    SUM(Production[FlexibleBudgetPLN])
+
+// Budżet statyczny
+Budżet statyczny =
+    SUM(Production[StaticBudgetPLN])
+
+// Materiał
+Materiał =
+    SUM(Production[MaterialCostPLN])
+
+// Praca
+Praca =
+    SUM(Production[LaborCostPLN])
+
+// Energia
+Energia =
+    SUM(Production[EnergyCostPLN])
+
+// Dobre sztuki
+Dobre sztuki =
+    SUM(Production[GoodUnits])
+
+// Braki
+Braki =
+    SUM(Production[ScrapUnits])
+
+// Produkcja ogółem
+Produkcja ogółem =
+    SUM(Production[TotalUnits])
+
+// Koszt jednostkowy
+Koszt jednostkowy =
+    DIVIDE([Koszt produkcji],[Dobre sztuki])
+
+// Odchylenie efektywności
+Odchylenie efektywności =
+    [Koszt produkcji]-[Budżet elastyczny]
+
+// Efekt wolumenu
+Efekt wolumenu =
+    [Budżet elastyczny]-[Budżet statyczny]
+
+// Odchylenie całkowite
+Odchylenie całkowite =
+    [Koszt produkcji]-[Budżet statyczny]
+
+// Braki %
+Braki % =
+    DIVIDE([Braki],[Produkcja ogółem])
+
+// Dostępność
+Dostępność =
+    DIVIDE(SUM(Production[RunMinutes]),SUM(Production[PlannedMinutes]))
+
+// Wydajność
+Wydajność =
+    DIVIDE(SUM(Production[IdealMinutes]),SUM(Production[RunMinutes]))
+
+// Jakość
+Jakość =
+    DIVIDE([Dobre sztuki],[Produkcja ogółem])
+
+// OEE zagregowane z ważonych komponentów; nie średnia procentów partii.
+OEE =
+    [Dostępność]*[Wydajność]*[Jakość]
+
+// Wartość poprzedni miesiąc
+Wartość poprzedni miesiąc =
+    CALCULATE([Koszt produkcji], DATEADD('Date'[Date],-1,MONTH))
+
+// Porównanie bieżącego zbioru dat z przesuniętym o miesiąc; na karcie wybierz jeden miesiąc.
+Zmiana m/m % =
+    DIVIDE([Koszt produkcji]-[Wartość poprzedni miesiąc],[Wartość poprzedni miesiąc])
+
+// Wartość poprzedni rok
+Wartość poprzedni rok =
+    CALCULATE([Koszt produkcji], SAMEPERIODLASTYEAR('Date'[Date]))
+
+// Zmiana r/r %
+Zmiana r/r % =
+    DIVIDE([Koszt produkcji]-[Wartość poprzedni rok],[Wartość poprzedni rok])
+
+// Wartość YTD
+Wartość YTD =
+    TOTALYTD([Koszt produkcji],'Date'[Date])

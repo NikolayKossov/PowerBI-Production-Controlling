@@ -1,0 +1,13 @@
+ProductID,Product,Family,StandardUnitCost
+P01,Komponent 01,Aluminium,42
+P02,Komponent 02,Montaż,49
+P03,Komponent 03,Stal,56
+P04,Komponent 04,Aluminium,63
+P05,Komponent 05,Montaż,70
+P06,Komponent 06,Stal,77
+P07,Komponent 07,Aluminium,84
+P08,Komponent 08,Montaż,91
+P09,Komponent 09,Stal,98
+P10,Komponent 10,Aluminium,105
+P11,Komponent 11,Montaż,112
+P12,Komponent 12,Stal,119

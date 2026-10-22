@@ -1,0 +1,23 @@
+{
+  "name": "Production Controlling",
+  "dataColors": [
+    "#F0AE49",
+    "#284B63",
+    "#E47C61",
+    "#A9BBCB",
+    "#597A91"
+  ],
+  "background": "#F2F5F8",
+  "foreground": "#152C44",
+  "tableAccent": "#F0AE49",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 11
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 13
+    }
+  }
+}

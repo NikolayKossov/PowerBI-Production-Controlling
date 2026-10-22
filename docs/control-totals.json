@@ -1,0 +1,18 @@
+{
+  "Koszt produkcji": {
+    "value": 53436467.94999996,
+    "unit": "PLN"
+  },
+  "Koszt / dobra sztuka": {
+    "value": 83.95729576477828,
+    "unit": "PLN"
+  },
+  "Braki": {
+    "value": 0.028389375775681645,
+    "unit": "%"
+  },
+  "OEE": {
+    "value": 0.6248275663218193,
+    "unit": "%"
+  }
+}
